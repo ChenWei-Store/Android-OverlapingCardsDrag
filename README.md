@@ -1,2 +1,2 @@
 # Android-OverlapingCardsDrag
-仿探探首页
+重叠卡片式布局.(例如大街网首页，探探首页)
