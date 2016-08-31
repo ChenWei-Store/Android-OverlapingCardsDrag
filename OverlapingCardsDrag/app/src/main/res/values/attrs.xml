@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CardsDragFrameLayout">
+        <attr name="card_y_offest_value" format="dimension" />
+        <attr name="scale_x_offest_value" format="float"/>
+    </declare-styleable>
+
+</resources>

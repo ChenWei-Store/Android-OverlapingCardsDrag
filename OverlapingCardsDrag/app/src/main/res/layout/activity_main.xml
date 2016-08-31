@@ -1,0 +1,58 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
+
+    <com.android.card.overlapingcardsdrag.CardsDragFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <com.android.card.overlapingcardsdrag.ItemCardView
+            android:id="@+id/item_card_view1"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            />
+        <com.android.card.overlapingcardsdrag.ItemCardView
+            android:id="@+id/item_card_view2"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            />
+        <com.android.card.overlapingcardsdrag.ItemCardView
+            android:id="@+id/item_card_view3"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            />
+    </com.android.card.overlapingcardsdrag.CardsDragFrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="15dp"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_highlight_remove_24dp"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentLeft="true"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mood_24dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp"/>
+    </RelativeLayout>
+</LinearLayout>
