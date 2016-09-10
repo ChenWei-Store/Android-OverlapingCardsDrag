@@ -3,6 +3,8 @@
     <declare-styleable name="CardsDragFrameLayout">
         <attr name="card_y_offest_value" format="dimension" />
         <attr name="scale_x_offest_value" format="float"/>
+        <attr name="isHasBottomLayout" format="boolean" />
+
     </declare-styleable>
 
 </resources>
