@@ -7,6 +7,7 @@
     android:orientation="vertical" >
 
     <com.android.card.overlapingcardsdrag.CardsDragFrameLayout
+        android:id="@+id/cards_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:card_y_offest_value="20dp"
@@ -20,6 +21,7 @@
             android:layout_marginRight="25dp"
             android:layout_marginTop="340dp">
             <ImageView
+                android:id="@+id/to_left_imgv"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/ic_highlight_remove_24dp"
@@ -27,6 +29,7 @@
                 android:layout_alignParentLeft="true"/>
 
             <ImageView
+                android:id="@+id/to_right_imgv"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/ic_mood_24dp"

@@ -46,7 +46,7 @@ public class CardsDragFrameLayout extends FrameLayout {
 
     private boolean isSmoothSlideView;
 
-
+    private ItemCardView topView;
 
     public CardsDragFrameLayout(Context context) {
         this(context, null);
@@ -137,6 +137,9 @@ public class CardsDragFrameLayout extends FrameLayout {
             cardViews[i - differenceValue] = itemCardView;
             cardViews[i - differenceValue].initTextView("name" + i, "other" + i);
         }
+
+        topView = cardViews[cardsCount - 1];
+
 
         //只需要初始化最顶部2个view界面即可
         cardViews[cardsCount - 1].initImageView(R.drawable.archer);
@@ -239,15 +242,23 @@ public class CardsDragFrameLayout extends FrameLayout {
         return true;
     }
 
+    private void translateLeftOutside(){
+        int viewWidth = topView.getWidth();
+        translateOutside(-viewWidth);
+    }
+
+    private void translateRightOutside(){
+        int viewWidth = topView.getWidth();
+        translateOutside(viewWidth);
+    }
+
     /**
      * 将顶层cardview移出界面
      */
-    private void  flyOutside(){
-        ItemCardView topView = cardViews[cardViews.length - 1];
-        int startPropertyValue = topView.getLeft();
+    private void  translateOutside(float endPropertyValue){
 
         ObjectAnimator oa =  ObjectAnimator.ofFloat(
-                topView, "translationX", startPropertyValue);
+                topView, "translationX", endPropertyValue);
         oa.setDuration(800);
         oa.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -260,13 +271,30 @@ public class CardsDragFrameLayout extends FrameLayout {
         oa.start();
     }
 
+
+    public void flyToLeftOutside(){
+        int topViewWidth = topView.getWidth();
+        int topViewLeft = topView.getLeft();
+        float endPropertyValue = -(topViewWidth + topViewLeft);
+        translateOutside(endPropertyValue);
+    }
+
+    public void flyToRightOutside(){
+        int topViewWidth = topView.getWidth();
+        int topViewRight = topView.getRight();
+        float endPropertyValue = topViewWidth + topViewRight;
+        translateOutside(endPropertyValue);
+    }
+
+
+
+
     /**
      * 移出后还原界面
      */
     private void afterFly(){
-        ItemCardView itemCardView =  cardViews[cardsCount - 1];
-        itemCardView.setTranslationX(0);
-        itemCardView.invalidate();
+        topView.setTranslationX(0);
+        topView.invalidate();
         requestLayout();
     }
 
@@ -329,11 +357,11 @@ public class CardsDragFrameLayout extends FrameLayout {
 
             if( left <= -width / 2 ){
                 //topView距离屏幕左边移出至少一半
-                flyOutside();
+                translateLeftOutside();
 
             }else if( left >= getWidth() - width / 2){
                 //topView距离屏幕右边移出至少一半
-                flyOutside();
+                translateRightOutside();
             }else {
                 dragHelper.settleCapturedViewAt(topViewLeft, topViewTop);
 //                dragHelper.smoothSlideViewTo(releasedChild, topViewLeft, topViewTop);
