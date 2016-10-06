@@ -4,18 +4,20 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Scroller;
 import android.widget.TextView;
 
+
 /**
- * Created by shangshicc on 2016/8/28.
+ * author: ChenWei
+ * create date: 2016/8/28.
+ * description: 封装的cardview类
  */
+
 public class ItemCardView extends LinearLayout {
     private TextView nameTv;
     private TextView otherTv;
     private ImageView cardImgv;
 
-    private Scroller scroller;
     public ItemCardView(Context context) {
         this(context, null);
     }
@@ -34,7 +36,7 @@ public class ItemCardView extends LinearLayout {
         otherTv = (TextView)findViewById(R.id.other);
         cardImgv = (ImageView)findViewById(R.id.photo);
 
-        scroller = new Scroller(context);
+
     }
 
     public void initTextView(String name,String other){
@@ -46,26 +48,4 @@ public class ItemCardView extends LinearLayout {
         cardImgv.setImageResource(resId);
     }
 
-
-    @Override
-    public void computeScroll() {
-        super.computeScroll();
-        if(scroller.computeScrollOffset()){
-            scrollTo(scroller.getCurrX(),scroller.getCurrY());
-            postInvalidate();
-        }
-    }
-
-    public void smoothScrollTo(int fx, int fy){
-        int dx = fx - scroller.getFinalX();
-        int dy = fy - scroller.getFinalY();
-        smoothScrollBy(dx, dy);
-
-    }
-
-    public void smoothScrollBy(int dx, int dy){
-        scroller.startScroll(scroller.getFinalX(), scroller.getFinalY(), dx,
-                dy, 3000);
-        invalidate();
-    }
 }
