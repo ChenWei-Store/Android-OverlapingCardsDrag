@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 
+import java.util.ArrayList;
+
 import static android.support.v4.widget.ViewDragHelper.*;
 
 /**
@@ -30,14 +32,14 @@ public class CardsDragFrameLayout extends FrameLayout {
 
     private ViewDragHelper dragHelper;
 
-    private View topDragView; // 保存顶部用于拖动的view
     private int topViewLeft; //topView未拖动前与parentView在x轴上的距离
     private int topViewTop;//topView未拖动前与parentView在y轴上的距离
 
-    private int cardsCount; //布局中的卡片数量
-    private int overlapingCardsCount; // 重叠的卡片数量
+    private int cardViewsCount; //布局中的卡片数量
+    private int overlapingcardViewsCount; // 用户实际看到的卡片数量
+    private int cardsCount;  //cards总数
 
-    private ItemCardView[] cardViews; //重叠卡片view(由底部到顶部)
+    private ArrayList<ItemCardView> cardViews; //重叠卡片view(由底部到顶部)
 
     private View bottomLayout; //底部view
 
@@ -47,6 +49,10 @@ public class CardsDragFrameLayout extends FrameLayout {
     private boolean isSmoothSlideView;
 
     private ItemCardView topView;
+
+    private UpdateCardViewListener updateCardViewListener;
+
+    private int topCardPosi;
 
     public CardsDragFrameLayout(Context context) {
         this(context, null);
@@ -77,6 +83,7 @@ public class CardsDragFrameLayout extends FrameLayout {
 //        viewBelowCardMargin = typedArray.getDimensionPixelOffset
 //                (R.styleable.CardsDragFrameLayout_view_below_card_margin, 40);
 
+        //是否有底部layout
         isHasBottomLayout = typedArray.getBoolean
                 (R.styleable.CardsDragFrameLayout_isHasBottomLayout, false);
     }
@@ -86,14 +93,14 @@ public class CardsDragFrameLayout extends FrameLayout {
      * 获得设置卡片重叠效果所需的缩放/平移参数.
      */
     private void getScalesAndTranslateParams() {
-        scaleXValues = new float[overlapingCardsCount];
-        translateYValues = new int[overlapingCardsCount];
+        scaleXValues = new float[overlapingcardViewsCount];
+        translateYValues = new int[overlapingcardViewsCount];
         //设置起始x轴缩放值,以最外层的cardview作为标准(最外层cardview scaleX = 1)
-        float scaleX = 1 - scaleXOffest * (overlapingCardsCount - 1);
+        float scaleX = 1 - scaleXOffest * (overlapingcardViewsCount - 1);
         //设置起始平移值，,以最外层的cardview作为标准(最外层cardview的平移值为0)
-        int translateY = cardYOffest * (overlapingCardsCount - 1);
+        int translateY = cardYOffest * (overlapingcardViewsCount - 1);
 
-        for (int i = 0; i < overlapingCardsCount; i++) {
+        for (int i = 0; i < overlapingcardViewsCount; i++) {
             scaleXValues[i] = scaleX;
             translateYValues[i] = translateY;
 
@@ -106,49 +113,72 @@ public class CardsDragFrameLayout extends FrameLayout {
     /**
      * 根据是否有bottomLayout计算cardview和overlapingCardsView 的数量
      */
-    private void getCardsCount() {
+    private void getcardViewsCount() {
         int count = getChildCount();
-        cardsCount = count;
+        cardViewsCount = count;
         if (isHasBottomLayout) {
-            cardsCount = count - 1;
+            cardViewsCount = count - 1;
         }
-        overlapingCardsCount = cardsCount - 1;
+        overlapingcardViewsCount = cardViewsCount - 1;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        getCardsCount();
+        getcardViewsCount();
 
         //保存view实例
         int begin = 0;
-        int differenceValue = 0;
         //如果有botomview，保存其引用值
         if (isHasBottomLayout) {
             bottomLayout = getChildAt(begin++);
-            differenceValue = 1;
         }
 
         //保存所有cardview引用
-        cardViews = new ItemCardView[cardsCount];
+
+        cardViews = new ArrayList<>();
         for (int i = begin; i < getChildCount(); i++) {
             ItemCardView itemCardView = (ItemCardView) getChildAt(i);
-            cardViews[i - differenceValue] = itemCardView;
-            cardViews[i - differenceValue].initTextView("name" + i, "other" + i);
+            cardViews.add(itemCardView);
+
         }
 
-        topView = cardViews[cardsCount - 1];
+        topView = cardViews.get(cardViewsCount - 1);
 
-
-        //只需要初始化最顶部2个view界面即可
-        cardViews[cardsCount - 1].initImageView(R.drawable.archer);
-        cardViews[cardsCount - 2].initImageView(R.drawable.saber);
-//        cardViews[cardsCount - 1].initTextView("name1","other1");
-//        cardViews[cardsCount - 2].initTextView("name2", "other2");
 
         getScalesAndTranslateParams();
 
+    }
+
+    /**
+     * 设置卡片的数量
+     * @param cardsCount
+     */
+    public void setCardsCount(int cardsCount){
+        this.cardsCount = cardsCount;
+    }
+
+
+    private void updateCardViewsUI(){
+        if(updateCardViewListener == null){
+            throw new IllegalArgumentException("请先设置UpdateCardViewListener监听器");
+        }
+
+
+
+        ArrayList<ItemCardView> cardViews2 =new ArrayList<>();
+
+        int lastIndex = cardsCount;
+        if(cardsCount > overlapingcardViewsCount){
+            lastIndex = overlapingcardViewsCount;
+        }
+
+        for(int i = 0; i < lastIndex; i++){
+            cardViews2.add(cardViews.get(cardViewsCount - i - 1));
+        }
+
+        updateCardViewListener.updateCardView(topCardPosi++,cardViews2);
 
     }
 
@@ -183,7 +213,7 @@ public class CardsDragFrameLayout extends FrameLayout {
         }
 
         //设置重叠卡片位置
-        ItemCardView itemCardView = cardViews[0];
+        ItemCardView itemCardView = cardViews.get(0);
         LayoutParams flParmas = (LayoutParams)
                 itemCardView.getLayoutParams();
         int height = itemCardView.getMeasuredHeight();
@@ -194,8 +224,9 @@ public class CardsDragFrameLayout extends FrameLayout {
         int bottom = height + top;
 
         //设置cardview位置.
-        for (int i = 0; i < cardsCount; i++) {
-            ItemCardView cardView = cardViews[i];
+        for (int i = 0; i < cardViewsCount; i++) {
+            Log.e("i","i:    "+i);
+            ItemCardView cardView = cardViews.get(i);
             //设置每个cardView的默认位置
             cardView.layout(left, top, right, bottom);
 
@@ -211,10 +242,9 @@ public class CardsDragFrameLayout extends FrameLayout {
 
 
         //保存顶部用于拖动的view以及顶部view的坐标值
-        if (overlapingCardsCount > 0) {
-            topDragView = cardViews[cardsCount - 1];
-            topViewLeft = topDragView.getLeft();
-            topViewTop = topDragView.getTop();
+        if (overlapingcardViewsCount > 0) {
+            topViewLeft = topView.getLeft();
+            topViewTop = topView.getTop();
         }
     }
 
@@ -257,7 +287,7 @@ public class CardsDragFrameLayout extends FrameLayout {
      */
     private void  translateOutside(float endPropertyValue){
 
-        ObjectAnimator oa =  ObjectAnimator.ofFloat(
+        ObjectAnimator oa = ObjectAnimator.ofFloat(
                 topView, "translationX", endPropertyValue);
         oa.setDuration(800);
         oa.addListener(new AnimatorListenerAdapter() {
@@ -265,6 +295,10 @@ public class CardsDragFrameLayout extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 afterFly();
+
+                cardsCount--;
+
+                updateCardViewsUI();
             }
         });
 
@@ -286,16 +320,36 @@ public class CardsDragFrameLayout extends FrameLayout {
         translateOutside(endPropertyValue);
     }
 
+    public void initCardViews(){
+        if(cardsCount == 0){
+            throw new IllegalArgumentException("请先调用setCardsCount()初始化卡片总数，然后在调用该方法");
+        }
 
+        updateCardViewsUI();
+    }
 
 
     /**
      * 移出后还原界面
      */
     private void afterFly(){
-        topView.setTranslationX(0);
-        topView.invalidate();
-        requestLayout();
+        Log.e("cardsCount","cardsCount:  "+cardsCount);
+        Log.e("cardsCount","cardViewsCount:  "+cardViewsCount);
+
+
+        if(cardsCount > cardViewsCount ) {
+            topView.setTranslationX(0);
+            topView.invalidate();
+            requestLayout();
+        }else{
+
+            cardViews.remove(cardViewsCount - 1);
+            overlapingcardViewsCount -= 1;
+            cardViewsCount -= 1;
+            topView = cardViews.get(cardViewsCount - 1);
+
+            requestLayout();
+        }
     }
 
     class CardDragCallback extends ViewDragHelper.Callback{
@@ -308,10 +362,10 @@ public class CardsDragFrameLayout extends FrameLayout {
          */
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            if(topDragView == null){
+            if(topView == null){
                 return false;
             }
-            return topDragView == child;
+            return topView == child;
         }
 
         /**
@@ -367,9 +421,9 @@ public class CardsDragFrameLayout extends FrameLayout {
 //                dragHelper.smoothSlideViewTo(releasedChild, topViewLeft, topViewTop);
                 ViewCompat.postInvalidateOnAnimation(CardsDragFrameLayout.this);
                 //还原topView位置
-                for (int i = 1; i < cardViews.length - 1; i++) {
-                    cardViews[i].setScaleX(scaleXValues[i - 1]);
-                    cardViews[i].setTranslationY(translateYValues[i - 1]);
+                for (int i = 1; i < cardViewsCount - 1; i++) {
+                    cardViews.get(i).setScaleX(scaleXValues[i - 1]);
+                    cardViews.get(i).setTranslationY(translateYValues[i - 1]);
                 }
             }
 
@@ -403,21 +457,21 @@ public class CardsDragFrameLayout extends FrameLayout {
              * 正数第二个view位置最终要移动到到未拖动前顶部view的位置，
              * 最顶部view正在拖动中，因此在该方法中对该view不做处理.
              */
-            for(int i = 1; i < cardViews.length - 1; i++) {
+            for(int i = 1; i < cardViewsCount - 1; i++) {
                 //沿x轴放大缩放变换，为了达到逐渐放大的效果，每次只缩放原来缩放值的 1 / 100
-                float nowScaleX = cardViews[i].getScaleX();
+                float nowScaleX = cardViews.get(i).getScaleX();
                 if (nowScaleX < scaleXValues[i]) {
                     float scaleValue = nowScaleX + scaleXOffest / 100;
 //                    if(scaleValue > scaleXValues[i]){
 //                        scaleValue = scaleXValues[i];
 //                    }
-                    cardViews[i].setScaleX(scaleValue);
+                    cardViews.get(i).setScaleX(scaleValue);
                 }
                 //沿y轴负方向平移变换，为了达到逐渐平移的效果，每次只缩放原来平移值的 1 / 30
-                float translationY = cardViews[i].getTranslationY();
+                float translationY = cardViews.get(i).getTranslationY();
                 if (translationY > translateYValues[i]) {
                     float translateOffest = translationY - cardYOffest / 30;
-                    cardViews[i].setTranslationY(translateOffest);
+                    cardViews.get(i).setTranslationY(translateOffest);
                 }
             }
         }
@@ -446,5 +500,13 @@ public class CardsDragFrameLayout extends FrameLayout {
             isSmoothSlideView = true;
             ViewCompat.postInvalidateOnAnimation(CardsDragFrameLayout.this);
         }
+    }
+
+    public interface UpdateCardViewListener{
+        void updateCardView(int topCardPosi,ArrayList<ItemCardView> itemCardViews);
+    }
+
+    public void addListener(UpdateCardViewListener updateCardViewListener){
+        this.updateCardViewListener = updateCardViewListener;
     }
 }

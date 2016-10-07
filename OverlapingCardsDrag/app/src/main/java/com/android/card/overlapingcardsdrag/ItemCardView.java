@@ -44,8 +44,16 @@ public class ItemCardView extends LinearLayout {
         otherTv.setText(other);
     }
 
-    public void initImageView(int resId){
-        cardImgv.setImageResource(resId);
+
+    public ImageView getCardImgv() {
+        return cardImgv;
     }
 
+    public TextView getNameTv() {
+        return nameTv;
+    }
+
+    public TextView getOtherTv() {
+        return otherTv;
+    }
 }
